@@ -5,6 +5,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
+from app.database.db import initialize_database
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -23,6 +25,7 @@ with open(Path(__file__).parents[1] / "pyproject.toml", "rb") as f:
 async def lifespan(_: FastAPI):
     """Lifespan for the FastAPI app."""
     logger.info("Starting FastAPI app")
+    await initialize_database()
     yield
     logger.info("Stopping FastAPI app")
 
@@ -33,8 +36,3 @@ app = FastAPI(
     version=pyproject_data["project"]["version"],
     lifespan=lifespan,
 )
-
-
-@app.get("/")
-def read_root():
-    return {"message": "Hello World"}
