@@ -1,0 +1,22 @@
+{
+    "ruff.configuration": "${workspaceFolder}/pyproject.toml",
+    "editor.rulers": [
+        120
+    ],
+    "[markdown]": {
+        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+    },
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnType": false,
+        "editor.formatOnSave": false,
+    },
+    "git.untrackedChanges": "separate",
+    "workbench.editor.enablePreview": false,
+    "workbench.tree.indent": 20,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.inlayHints.callArgumentNames": "partial",
+    "python.analysis.inlayHints.functionReturnTypes": true
+}

@@ -3,11 +3,63 @@ name = "meeting-app-backend"
 version = "0.1.0"
 description = "Meeting App Backend"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "bcrypt>=4.3.0",
     "fastapi[standard]>=0.115.12",
     "pydantic>=2.11.2",
     "pydantic-settings>=2.8.1",
     "pyjwt>=2.10.1",
+    "ruff>=0.11.4",
 ]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+select = [
+    "A",      # flake8-builtins
+    "B",      # flake8-bugbear
+    "E",      # pycodestyle
+    "D",      # pydocstyle
+    "F",      # pyflakes
+    "G",      # flake8-logging-format
+    "I",      # isort
+    "Q",      # flake8-quotes
+    "RET",    # flake8-return
+    "S",      # flake8-bandit
+    "W",      # pycodestyle
+    "ASYNC",  # flake8-async
+    "LOG",    # flake8-logging
+    "SIM",    # flake8-simplify
+    "ANN202", # flake8-annotations
+    "ANN205", # flake8-annotations
+    "ANN206", # flake8-annotations
+    "COM812", # flake8-commas
+    "COM818", # flake8-commas
+    "D204",   # pydocstyle
+]
+ignore = [
+    "B008", # flake8-bugbear
+    "D100", # pycodestyle
+    "D104", # pycodestyle
+    "D105", # pycodestyle
+    "D200", # pycodestyle
+    "D212", # pycodestyle
+]
+
+[tool.ruff.lint]
+dummy-variable-rgx = "^_$" # only ignore variables named "_"
+fixable = ["F401"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-annotations]
+ignore-fully-untyped = true
+suppress-none-returning = true
+
+[tool.ruff.isort]
+known-first-party = ["app"]
+
+[tool.pyright]
+typeCheckingMode = "standard"
