@@ -4,7 +4,8 @@ from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.config import settings
-from app.core.models import MODELS
+
+from .models import MODELS
 
 logger = logging.getLogger(__name__)
 
