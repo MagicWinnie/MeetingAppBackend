@@ -4,13 +4,13 @@ from typing import Annotated
 import bcrypt
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.api.auth.schemas import TokenPayload
 from app.config import settings
 from app.core.models.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+security = HTTPBearer()
 
 
 def get_password_hash(password: str) -> str:
@@ -54,11 +54,11 @@ def create_token(subject: str, expires_delta: timedelta) -> str:
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
-    """Dependency to get and validate the current user from a JWT token.
+async def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> User:
+    """Dependency to get and validate the current user from a Bearer JWT token.
 
     Args:
-        token: JWT token from Authorization header
+        credentials: Bearer token credentials from Authorization header
 
     Returns:
         Authenticated user object
@@ -68,16 +68,18 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Invalid or expired Bearer token",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     try:
+        token = credentials.credentials
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise credentials_exception
         token_data = TokenPayload(sub=user_id, exp=payload.get("exp"))
-    except jwt.PyJWTError as e:
+    except (jwt.PyJWTError, AttributeError) as e:
         raise credentials_exception from e
 
     user = await User.get(token_data.sub)
