@@ -3,10 +3,26 @@ networks:
     driver: bridge
 
 services:
+  db:
+    image: mongo:8
+    container_name: meetingapp-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
   app:
     build:
       context: .
       dockerfile: ./app/Dockerfile
+    depends_on:
+      - db
     container_name: meetingapp-app
     env_file:
       - .env
