@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from app.database.db import initialize_database
+from app.core.database import initialize_database
 
 logging.basicConfig(
     level=logging.INFO,
