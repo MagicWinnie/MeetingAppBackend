@@ -5,7 +5,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from app.database.db import initialize_database
+from app.api import ROUTERS
+from app.core.database import initialize_database
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,3 +37,6 @@ app = FastAPI(
     version=pyproject_data["project"]["version"],
     lifespan=lifespan,
 )
+
+for router in ROUTERS:
+    app.include_router(router)

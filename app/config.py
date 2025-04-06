@@ -10,6 +10,13 @@ class Settings(BaseSettings):
     MONGO_HOST: str = "db"
     MONGO_PORT: int = 27017
     MONGO_DB: str = "MeetingApp"
+    MONGO_TIMEOUT: int = 5000
+
+    # JWT settings
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     @property
     def MONGO_URI(self) -> str:
