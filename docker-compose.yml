@@ -2,6 +2,9 @@ networks:
   app-network:
     driver: bridge
 
+volumes:
+  db-data:
+
 services:
   db:
     image: mongo:8
@@ -11,6 +14,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     networks:
       - app-network
+    volumes:
+      - db-data:/data/db
     logging:
       driver: "json-file"
       options:
