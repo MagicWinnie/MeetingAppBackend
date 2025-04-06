@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     MONGO_HOST: str = "db"
     MONGO_PORT: int = 27017
     MONGO_DB: str = "MeetingApp"
+    MONGO_TIMEOUT: int = 5000
 
     @property
     def MONGO_URI(self) -> str:
