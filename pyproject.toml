@@ -18,6 +18,10 @@ dependencies = [
 [tool.ruff]
 line-length = 120
 target-version = "py311"
+
+[tool.ruff.lint]
+dummy-variable-rgx = "^_$" # only ignore variables named "_"
+fixable = ["F401"]
 select = [
     "A",      # flake8-builtins
     "B",      # flake8-bugbear
@@ -49,10 +53,6 @@ ignore = [
     "D212", # pycodestyle
 ]
 
-[tool.ruff.lint]
-dummy-variable-rgx = "^_$" # only ignore variables named "_"
-fixable = ["F401"]
-
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
@@ -60,7 +60,7 @@ convention = "google"
 ignore-fully-untyped = true
 suppress-none-returning = true
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["app"]
 
 [tool.pyright]
