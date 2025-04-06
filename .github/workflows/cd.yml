@@ -1,0 +1,37 @@
+name: CD
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            # Check available free space (in KB)
+            available=$(df --output=avail / | tail -n1)
+            
+            # Check if available space is greater than 1GB
+            if [ "$available" -lt 1048576 ]; then
+              echo "Not enough storage space available on server." >&2
+              exit 1
+            fi
+
+            cd /root/MeetingAppBackend
+            git checkout main
+
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
