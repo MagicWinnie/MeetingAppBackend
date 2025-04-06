@@ -20,6 +20,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
+            set -e
+
             # Check available free space (in KB)
             available=$(df --output=avail / | tail -n1)
             
@@ -31,6 +33,7 @@ jobs:
 
             cd /root/MeetingAppBackend
             git checkout main
+            git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/MagicWinnie/MeetingAppBackend.git
             git pull
 
             docker compose down
