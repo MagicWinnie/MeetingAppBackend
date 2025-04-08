@@ -1,20 +1,28 @@
 from datetime import date, datetime, timezone
+from typing import Annotated
 
 from beanie import Document
 from pydantic import Field
+from pydantic_extra_types.phone_numbers import PhoneNumber, PhoneNumberValidator
+
+PhoneNumberType = Annotated[
+    str | PhoneNumber,
+    PhoneNumberValidator(number_format="E164"),
+]
 
 
 class User(Document):
     """User model."""
 
-    email: str
-    hashed_password: str
+    phone_number: PhoneNumberType
+    email: str | None = None
+    password_hash: str
+    name: str | None = None
+    birth_date: date | None = None
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    full_name: str | None = None
-    birth_date: date | None = None
     location: str | None = None
     interests: list[str] = Field(default_factory=list)
 

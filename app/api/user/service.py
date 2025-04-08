@@ -44,16 +44,16 @@ class UserService:
             Updated user
 
         Raises:
-            HTTPException (400): If email already exists
+            HTTPException (400): If phone number already exists
         """
         update_data = user_update.model_dump(exclude_unset=True)
 
-        if "email" in update_data:
-            user = await User.find_one(User.email == update_data["email"])
+        if "phone_number" in update_data:
+            user = await User.find_one(User.phone_number == update_data["phone_number"])
             if user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email already exists",
+                    detail="Phone number already exists",
                 )
 
         if update_data:

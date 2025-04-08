@@ -3,13 +3,18 @@ from datetime import date, datetime
 from beanie import PydanticObjectId
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from app.core.models.user import PhoneNumberType
+
 
 class UserUpdate(BaseModel):
     """Schema for user profile update."""
 
+    phone_number: PhoneNumberType | None = None
     email: EmailStr | None = None
-    full_name: str | None = None
+    password_hash: str | None = None
+    name: str | None = None
     birth_date: date | None = None
+
     location: str | None = None
     interests: list[str] | None = None
 
@@ -20,8 +25,9 @@ class UserResponse(BaseModel):
     """Schema for user response."""
 
     id: PydanticObjectId
-    email: EmailStr
-    full_name: str | None = None
+    phone_number: PhoneNumberType
+    email: EmailStr | None = None
+    name: str | None = None
     birth_date: date | None = None
     age: int | None = None
     location: str | None = None
