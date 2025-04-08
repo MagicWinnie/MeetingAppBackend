@@ -2,49 +2,49 @@ from datetime import timedelta
 
 import jwt
 from fastapi import HTTPException, status
-from pydantic import EmailStr
 
 from app.api.auth.dependencies import create_token, get_password_hash, verify_password
 from app.api.auth.schemas import Token
 from app.config import settings
-from app.core.models.user import User
+from app.core.models.user import PhoneNumberType, User
 
 
 class AuthService:
     """Service for authentication."""
 
     @staticmethod
-    async def register(email: EmailStr, password: str) -> User:
+    async def register(name: str, phone_number: PhoneNumberType, password: str) -> User:
         """Register a new user.
 
         Args:
-            email: User's email address
+            name: User's name
+            phone_number: User's phone number
             password: User's password
 
         Returns:
             Newly created user object
 
         Raises:
-            HTTPException (400): If user with this email already exists
+            HTTPException (400): If user with this phone number already exists
         """
-        existing_user = await User.find_one(User.email == email)
+        existing_user = await User.find_one(User.phone_number == phone_number)
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User with this email already exists",
+                detail="User with this phone number already exists",
             )
 
         hashed_password = get_password_hash(password)
-        user = User(email=email, hashed_password=hashed_password)
+        user = User(name=name, phone_number=phone_number, password_hash=hashed_password)
         await user.insert()
         return user
 
     @staticmethod
-    async def login(email: EmailStr, password: str) -> Token:
+    async def login(phone_number: PhoneNumberType, password: str) -> Token:
         """Authenticate a user and generate access and refresh tokens.
 
         Args:
-            email: User's email address
+            phone_number: User's phone number
             password: User's password
 
         Returns:
@@ -53,11 +53,11 @@ class AuthService:
         Raises:
             HTTPException (401): If credentials are invalid
         """
-        user = await User.find_one(User.email == email)
-        if not user or not verify_password(password, user.hashed_password):
+        user = await User.find_one(User.phone_number == phone_number)
+        if not user or not verify_password(password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password",
+                detail="Incorrect phone number or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
