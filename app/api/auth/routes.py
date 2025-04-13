@@ -9,7 +9,7 @@ from app.api.auth.service import AuthService
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=None)
+@router.post("/register", status_code=status.HTTP_201_CREATED, response_model=Token)
 async def register(user_data: UserCreate):
     """Register a new user.
 
@@ -20,6 +20,7 @@ async def register(user_data: UserCreate):
         phone_number=user_data.phone_number,
         password=user_data.password,
     )
+    return await AuthService.login(phone_number=user_data.phone_number, password=user_data.password)
 
 
 @router.post("/login", response_model=Token)

@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # AWS S3 settings
+    AWS_S3_BUCKET: str = "meetingapp-profile-pictures"
+    AWS_S3_REGION: str = "us-east-1"
+    AWS_S3_ENDPOINT_URL: str = "http://185.157.214.169:4566"
+    AWS_S3_ACCESS_KEY_ID: str
+    AWS_S3_SECRET_ACCESS_KEY: str
+
     @property
     def MONGO_URI(self) -> str:
         """Construct MongoDB URI from credentials."""

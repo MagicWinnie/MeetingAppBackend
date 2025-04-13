@@ -19,6 +19,7 @@ class User(Document):
     password_hash: str
     name: str | None = None
     birth_date: date | None = None
+    photo_urls: list[str] = Field(default_factory=list)
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
