@@ -31,6 +31,7 @@ class UserResponse(BaseModel):
     birth_date: date | None = None
     age: int | None = None
     location: str | None = None
+    photo_urls: list[str] | None = None
     interests: list[str]
     created_at: datetime
     updated_at: datetime

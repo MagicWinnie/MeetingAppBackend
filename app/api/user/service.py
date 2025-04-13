@@ -1,11 +1,31 @@
+import uuid
 from datetime import date, datetime, timedelta, timezone
 
+import boto3
 from beanie import PydanticObjectId
 from beanie.operators import GTE, LTE, And, In
-from fastapi import HTTPException, status
+from botocore.config import Config as BotoConfig
+from fastapi import HTTPException, UploadFile, status
 
 from app.api.user.schemas import UserFilter, UserUpdate
+from app.config import settings
 from app.core.models.user import User
+
+s3_client = boto3.client(
+    "s3",
+    endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+    aws_access_key_id=settings.AWS_S3_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_S3_SECRET_ACCESS_KEY,
+    config=BotoConfig(
+        retries={
+            "max_attempts": 3,
+            "mode": "standard",
+        },
+        connect_timeout=5,
+        read_timeout=10,
+        region_name=settings.AWS_S3_REGION,
+    ),
+)
 
 
 class UserService:
@@ -106,3 +126,19 @@ class UserService:
             users_query = users_query.find(User.id != current_user_id)
 
         return await users_query.skip(skip).limit(limit).to_list()
+
+    @staticmethod
+    async def upload_profile_picture(current_user: User, file: UploadFile) -> User:
+        """Upload a profile picture to AWS S3 and update the user's photo_urls."""
+        if not file.filename or not file.filename.endswith((".jpg", ".jpeg", ".png")):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File must have a valid filename and extension",
+            )
+        unique_filename = f"{current_user.id}_{uuid.uuid4()}.{file.filename.split('.')[-1]}"
+        file.file.seek(0)
+        s3_client.upload_fileobj(file.file, settings.AWS_S3_BUCKET, unique_filename)
+        file_url = f"{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_S3_BUCKET}/{unique_filename}"
+        current_user.photo_urls.append(file_url)
+        await current_user.update({"$set": {"photo_urls": current_user.photo_urls}})
+        return current_user

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 
 from app.api.auth.dependencies import get_current_user
 from app.api.user.schemas import UserFilter, UserResponse, UserUpdate
@@ -60,3 +60,12 @@ async def find_users(
         skip=skip,
         limit=limit,
     )
+
+
+@router.post("/me/picture", response_model=UserResponse)
+async def upload_profile_picture(
+    current_user: Annotated[User, Depends(get_current_user)],
+    file: UploadFile = File(...),
+):
+    """Upload a profile picture to AWS S3."""
+    return await UserService.upload_profile_picture(current_user, file)
