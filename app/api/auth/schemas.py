@@ -30,3 +30,9 @@ class TokenPayload(BaseModel):
 
     sub: str
     exp: int
+
+
+class TokenRefresh(BaseModel):
+    """Token refresh schema."""
+
+    refresh_token: str
