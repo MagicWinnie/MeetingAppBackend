@@ -13,23 +13,24 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 async def register(user_data: UserCreate):
     """Register a new user.
 
-    Returns status code 400, if phone number already exists.
+    Returns status code 400, if username or email already exists.
     """
     await AuthService.register(
         name=user_data.name,
-        phone_number=user_data.phone_number,
+        username=user_data.username,
+        email=user_data.email,
         password=user_data.password,
     )
-    return await AuthService.login(phone_number=user_data.phone_number, password=user_data.password)
+    return await AuthService.login(username=user_data.username, password=user_data.password)
 
 
 @router.post("/login", response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     """Log in and get access token.
 
-    Returns status code 401, if phone number or password is incorrect.
+    Returns status code 401, if username or password is incorrect.
     """
-    return await AuthService.login(phone_number=form_data.username, password=form_data.password)
+    return await AuthService.login(username=form_data.username, password=form_data.password)
 
 
 @router.post("/refresh", response_model=Token)
