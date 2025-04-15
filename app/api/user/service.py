@@ -3,13 +3,15 @@ from datetime import date, datetime, timedelta, timezone
 
 import boto3
 from beanie import PydanticObjectId
-from beanie.operators import GTE, LTE, And, In
+from beanie.operators import GTE, LTE, And, In, Or
 from botocore.config import Config as BotoConfig
 from fastapi import HTTPException, UploadFile, status
 
+from app.api.auth.dependencies import get_password_hash
 from app.api.user.schemas import UserFilter, UserUpdate
 from app.config import settings
 from app.core.models.user import User
+from app.core.utils.age import get_age
 
 s3_client = boto3.client(
     "s3",
@@ -68,12 +70,22 @@ class UserService:
         """
         update_data = user_update.model_dump(exclude_unset=True)
 
-        if "phone_number" in update_data:
-            user = await User.find_one(User.phone_number == update_data["phone_number"])
+        if "username" in update_data or "email" in update_data:
+            user = await User.find_one(Or(User.username == update_data["username"], User.email == update_data["email"]))
             if user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Phone number already exists",
+                    detail="Username or email already exists",
+                )
+        if "password" in update_data:
+            update_data["password_hash"] = get_password_hash(update_data["password"])
+            del update_data["password"]
+        if "birth_date" in update_data:
+            age = get_age(update_data["birth_date"])
+            if age < 18:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="You must be at least 18 years old to use this service",
                 )
 
         if update_data:
@@ -102,21 +114,22 @@ class UserService:
         """
         query_conditions = []
 
-        if filter_params.interests is not None:
-            query_conditions.append(In(User.interests, filter_params.interests))
-
         today = date.today()
 
         if filter_params.min_age is not None:
             max_birth_date = date(today.year - filter_params.min_age, today.month, today.day)
             query_conditions.append(LTE(User.birth_date, max_birth_date))
-
         if filter_params.max_age is not None:
             min_birth_date = date(today.year - filter_params.max_age - 1, today.month, today.day) + timedelta(days=1)
             query_conditions.append(GTE(User.birth_date, min_birth_date))
-
+        if filter_params.gender is not None:
+            query_conditions.append(User.gender == filter_params.gender)
+        if filter_params.interests is not None:
+            query_conditions.append(In(User.interests, filter_params.interests))
         if filter_params.location is not None:
             query_conditions.append(User.location == filter_params.location)
+        if filter_params.verified is not None:
+            query_conditions.append(User.verified == filter_params.verified)
 
         query = And(*query_conditions) if query_conditions else {}
 

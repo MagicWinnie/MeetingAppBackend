@@ -1,20 +1,19 @@
-from pydantic import BaseModel, Field
-
-from app.core.models.user import PhoneNumberType
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserCreate(BaseModel):
     """User creation schema."""
 
     name: str
-    phone_number: PhoneNumberType
+    username: str
+    email: EmailStr
     password: str = Field(..., min_length=8)
 
 
 class UserLogin(BaseModel):
     """User login schema."""
 
-    phone_number: PhoneNumberType
+    username: str
     password: str
 
 
