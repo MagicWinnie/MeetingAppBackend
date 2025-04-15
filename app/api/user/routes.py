@@ -27,7 +27,7 @@ async def update_current_user(
     """Update the profile of the current authenticated user.
 
     Returns status code 401 if token is invalid or user doesn't exist.
-    Returns status code 400 if phone number already exists.
+    Returns status code 400 if username or email already exists.
     """
     return await UserService.update_user(current_user, user_update)
 

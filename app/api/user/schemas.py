@@ -3,7 +3,7 @@ from datetime import date, datetime
 from beanie import PydanticObjectId
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-from app.core.models.user import PhoneNumberType
+from app.core.models.user import Gender, PhoneNumberType
 
 
 class UserUpdate(BaseModel):
@@ -25,14 +25,18 @@ class UserResponse(BaseModel):
     """Schema for user response."""
 
     id: PydanticObjectId
-    phone_number: PhoneNumberType
-    email: EmailStr | None = None
-    name: str | None = None
-    birth_date: date | None = None
-    age: int | None = None
-    location: str | None = None
-    photo_urls: list[str] | None = None
+    username: str
+    email: str
+    name: str | None
+    birth_date: date | None
+    age: int | None
+    gender: Gender | None
+    bio: str | None
     interests: list[str]
+    location: str | None
+    photo_urls: list[str]
+    verified: bool
+    is_active: bool
     created_at: datetime
     updated_at: datetime
 
