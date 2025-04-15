@@ -6,6 +6,8 @@ from beanie import Document
 from pydantic import Field
 from pydantic_extra_types.phone_numbers import PhoneNumber, PhoneNumberValidator
 
+from app.core.utils.age import get_age
+
 # Currently not used, but let it be here for future use
 PhoneNumberType = Annotated[
     str | PhoneNumber,
@@ -43,12 +45,7 @@ class User(Document):
         """Calculate age based on birth date."""
         if self.birth_date is None:
             return None
-        today = datetime.now(timezone.utc)
-        if today.month < self.birth_date.month or (
-            today.month == self.birth_date.month and today.day < self.birth_date.day
-        ):
-            return today.year - self.birth_date.year - 1
-        return today.year - self.birth_date.year
+        return get_age(self.birth_date)
 
     class Settings:
         """Settings for the User model."""

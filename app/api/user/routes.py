@@ -44,21 +44,12 @@ async def get_user_profile(user_id: str, _: Annotated[User, Depends(get_current_
 @router.get("/", response_model=list[UserResponse])
 async def find_users(
     current_user: Annotated[User, Depends(get_current_user)],
-    interests: list[str] | None = Query(None, description="Filter by interests"),
-    min_age: int | None = Query(None, description="Minimum age"),
-    max_age: int | None = Query(None, description="Maximum age"),
-    location: str | None = Query(None, description="Filter by location"),
-    skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=100, description="Maximum number of records"),
+    filter_params: Annotated[UserFilter, Query(..., description="Filter parameters")],
 ):
     """Search users with filters."""
-    filter_params = UserFilter(interests=interests, min_age=min_age, max_age=max_age, location=location)
-
     return await UserService.search_users(
         filter_params=filter_params,
         current_user_id=current_user.id,
-        skip=skip,
-        limit=limit,
     )
 
 
