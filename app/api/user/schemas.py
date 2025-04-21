@@ -10,6 +10,8 @@ from app.core.models.user import Gender
 class UserUpdate(BaseModel):
     """Schema for user profile update."""
 
+    model_config = ConfigDict(extra="forbid", regex_engine="python-re")
+
     username: str | None = Field(default=None, min_length=3, max_length=64)
     email: EmailStr | None = None
     password: str | None = Field(
@@ -24,8 +26,6 @@ class UserUpdate(BaseModel):
     bio: str | None = None
     interests: list[str] | None = None
     location: str | None = None
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class UserResponse(BaseModel):
