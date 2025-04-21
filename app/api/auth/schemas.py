@@ -1,36 +1,34 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+import re
+
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.config import settings
+
+PASSWORD_REGEX = re.compile(settings.PASSWORD_PATTERN)
 
 
 class UserCreate(BaseModel):
     """User creation schema."""
 
-    model_config = ConfigDict(regex_engine="python-re")
-
     name: str = Field(..., min_length=3, max_length=64)
     username: str = Field(..., min_length=3, max_length=64)
     email: EmailStr
-    password: str = Field(
-        ...,
-        min_length=8,
-        pattern=settings.PASSWORD_REGEX,
-        description="Password must contain at least one letter and one digit, and be at least 8 characters long",
-    )
+    password: str = Field(..., min_length=8)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_format(cls, v: str) -> str:
+        """Validate password contains at least one letter and one digit."""
+        if not PASSWORD_REGEX.match(v):
+            raise ValueError("Password must contain at least one letter and one digit")
+        return v
 
 
 class UserLogin(BaseModel):
     """User login schema."""
 
-    model_config = ConfigDict(regex_engine="python-re")
-
-    username: str = Field(..., min_length=3, max_length=64)
-    password: str = Field(
-        ...,
-        min_length=8,
-        pattern=settings.PASSWORD_REGEX,
-        description="Password must contain at least one letter and one digit, and be at least 8 characters long",
-    )
+    username: str
+    password: str
 
 
 class Token(BaseModel):

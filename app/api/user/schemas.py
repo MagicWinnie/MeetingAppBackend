@@ -1,31 +1,37 @@
+import re
 from datetime import date, datetime
 
 from beanie import PydanticObjectId
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.config import settings
 from app.core.models.user import Gender
+
+PASSWORD_REGEX = re.compile(settings.PASSWORD_PATTERN)
 
 
 class UserUpdate(BaseModel):
     """Schema for user profile update."""
 
-    model_config = ConfigDict(extra="forbid", regex_engine="python-re")
+    model_config = ConfigDict(extra="forbid")
 
     username: str | None = Field(default=None, min_length=3, max_length=64)
     email: EmailStr | None = None
-    password: str | None = Field(
-        default=None,
-        min_length=8,
-        pattern=settings.PASSWORD_REGEX,
-        description="Password must contain at least one letter and one digit, and be at least 8 characters long",
-    )
+    password: str | None = Field(default=None, min_length=8)
     name: str | None = Field(default=None, min_length=3, max_length=64)
     birth_date: date | None = None
     gender: Gender | None = None
     bio: str | None = None
     interests: list[str] | None = None
     location: str | None = None
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_format(cls, v: str) -> str:
+        """Validate password contains at least one letter and one digit."""
+        if not PASSWORD_REGEX.match(v):
+            raise ValueError("Password must contain at least one letter and one digit")
+        return v
 
 
 class UserResponse(BaseModel):
