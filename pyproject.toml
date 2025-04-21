@@ -54,6 +54,7 @@ ignore = [
     "D105", # pycodestyle
     "D200", # pycodestyle
     "D212", # pycodestyle
+    "S105", # flake8-bandit
 ]
 
 [tool.ruff.lint.pydocstyle]
