@@ -5,10 +5,11 @@ from beanie.operators import Or
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 
-from app.api.auth.dependencies import create_token, get_password_hash, verify_password
-from app.api.auth.schemas import Token
 from app.config import settings
 from app.core.models.user import User
+
+from .dependencies import create_token, get_password_hash, verify_password
+from .schemas import Token
 
 
 class AuthService:

@@ -1,3 +1,4 @@
-from app.core.models.user import User
+from .user import User
+from .user_interest import UserInterest
 
-MODELS = [User]
+MODELS = [User, UserInterest]
