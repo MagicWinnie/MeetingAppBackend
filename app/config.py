@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     AWS_S3_ACCESS_KEY_ID: str
     AWS_S3_SECRET_ACCESS_KEY: str
 
+    PASSWORD_REGEX: str = r"^(?=.*[a-zA-Z])(?=.*\d).+$"
+
     @property
     def MONGO_URI(self) -> str:
         """Construct MongoDB URI from credentials."""

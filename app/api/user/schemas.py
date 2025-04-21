@@ -3,16 +3,22 @@ from datetime import date, datetime
 from beanie import PydanticObjectId
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.config import settings
 from app.core.models.user import Gender
 
 
 class UserUpdate(BaseModel):
     """Schema for user profile update."""
 
-    username: str | None = None
+    username: str | None = Field(default=None, min_length=3, max_length=64)
     email: EmailStr | None = None
-    password: str | None = None
-    name: str | None = None
+    password: str | None = Field(
+        default=None,
+        min_length=8,
+        pattern=settings.PASSWORD_REGEX,
+        description="Password must contain at least one letter and one digit, and be at least 8 characters long",
+    )
+    name: str | None = Field(default=None, min_length=3, max_length=64)
     birth_date: date | None = None
     gender: Gender | None = None
     bio: str | None = None

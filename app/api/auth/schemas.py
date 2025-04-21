@@ -1,20 +1,32 @@
 from pydantic import BaseModel, EmailStr, Field
 
+from app.config import settings
+
 
 class UserCreate(BaseModel):
     """User creation schema."""
 
-    name: str
-    username: str
+    name: str = Field(..., min_length=3, max_length=64)
+    username: str = Field(..., min_length=3, max_length=64)
     email: EmailStr
-    password: str = Field(..., min_length=8)
+    password: str = Field(
+        ...,
+        min_length=8,
+        pattern=settings.PASSWORD_REGEX,
+        description="Password must contain at least one letter and one digit, and be at least 8 characters long",
+    )
 
 
 class UserLogin(BaseModel):
     """User login schema."""
 
-    username: str
-    password: str
+    username: str = Field(..., min_length=3, max_length=64)
+    password: str = Field(
+        ...,
+        min_length=8,
+        pattern=settings.PASSWORD_REGEX,
+        description="Password must contain at least one letter and one digit, and be at least 8 characters long",
+    )
 
 
 class Token(BaseModel):
