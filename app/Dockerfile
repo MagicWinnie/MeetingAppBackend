@@ -12,4 +12,6 @@ COPY uv.lock uv.lock
 # Install dependencies
 RUN uv sync --frozen --no-cache
 
-CMD ["/app/.venv/bin/fastapi", "run", "app/main.py", "--port", "8000", "--host", "0.0.0.0"]
+RUN chmod +x app/init.sh
+
+ENTRYPOINT ["sh", "-c", "app/init.sh && /app/.venv/bin/fastapi run app/main.py --port 8000 --host 0.0.0.0"]
