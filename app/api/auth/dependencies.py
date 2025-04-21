@@ -6,9 +6,10 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.api.auth.schemas import TokenPayload
 from app.config import settings
 from app.core.models.user import User
+
+from .schemas import TokenPayload
 
 security = HTTPBearer()
 

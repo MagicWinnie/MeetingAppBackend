@@ -3,9 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, Query, UploadFile
 
 from app.api.auth.dependencies import get_current_user
-from app.api.user.schemas import UserFilter, UserResponse, UserUpdate
-from app.api.user.service import UserService
 from app.core.models.user import User
+
+from .schemas import UserFilter, UserResponse, UserUpdate
+from .service import UserService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -32,15 +33,6 @@ async def update_current_user(
     return await UserService.update_user(current_user, user_update)
 
 
-@router.get("/{user_id}", response_model=UserResponse)
-async def get_user_profile(user_id: str, _: Annotated[User, Depends(get_current_user)]):
-    """Get the profile of another user by ID.
-
-    Returns status code 404 if user is not found.
-    """
-    return await UserService.get_user_by_id(user_id)
-
-
 @router.get("/", response_model=list[UserResponse])
 async def find_users(
     current_user: Annotated[User, Depends(get_current_user)],
@@ -51,6 +43,15 @@ async def find_users(
         filter_params=filter_params,
         current_user_id=current_user.id,
     )
+
+
+@router.get("/{user_id}", response_model=UserResponse)
+async def get_user_profile(user_id: str, _: Annotated[User, Depends(get_current_user)]):
+    """Get the profile of another user by ID.
+
+    Returns status code 404 if user is not found.
+    """
+    return await UserService.get_user_by_id(user_id)
 
 
 @router.post("/me/picture", response_model=UserResponse)

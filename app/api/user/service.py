@@ -8,10 +8,11 @@ from botocore.config import Config as BotoConfig
 from fastapi import HTTPException, UploadFile, status
 
 from app.api.auth.dependencies import get_password_hash
-from app.api.user.schemas import UserFilter, UserUpdate
 from app.config import settings
 from app.core.models.user import User
 from app.core.utils.age import get_age
+
+from .schemas import UserFilter, UserUpdate
 
 s3_client = boto3.client(
     "s3",
