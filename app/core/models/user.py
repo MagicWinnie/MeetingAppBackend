@@ -8,6 +8,8 @@ from pydantic_extra_types.phone_numbers import PhoneNumber, PhoneNumberValidator
 
 from app.core.utils.age import get_age
 
+from .location import Location
+
 # Currently not used, but let it be here for future use
 PhoneNumberType = Annotated[
     str | PhoneNumber,
@@ -33,7 +35,7 @@ class User(Document):
     gender: Gender | None = None
     bio: str | None = None
     interests: list[str] = Field(default_factory=list)
-    location: str | None = None
+    location: Location | None = None
     photo_urls: list[str] = Field(default_factory=list)
     verified: bool = False
     is_active: bool = True
@@ -51,3 +53,13 @@ class User(Document):
         """Settings for the User model."""
 
         name = "users"
+        indexes = [
+            "username",
+            "email",
+            "birth_date",
+            "gender",
+            "location.longitude",
+            "location.latitude",
+            "verified",
+            "is_active",
+        ]
