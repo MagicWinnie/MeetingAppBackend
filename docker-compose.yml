@@ -29,6 +29,7 @@ services:
       dockerfile: ./app/Dockerfile
     depends_on:
       - db
+      - redis
     container_name: meetingapp-app
     env_file:
       - .env
