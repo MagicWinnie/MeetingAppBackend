@@ -62,3 +62,23 @@ class EmailService:
         )
 
         return await EmailService.send_email(to_email, subject, html_body, is_html=True)
+
+    @staticmethod
+    async def send_password_reset_email(to_email: str, otp: str) -> bool:
+        """Send password reset OTP.
+
+        Args:
+            to_email: Recipient email address
+            otp: One-time password for verification
+
+        Returns:
+            True if email was sent successfully, False otherwise
+        """
+        subject = "MeetingApp - Восстановление пароля"
+
+        html_body = render_template(
+            "email/password_reset.html",
+            {"otp": otp},
+        )
+
+        return await EmailService.send_email(to_email, subject, html_body, is_html=True)

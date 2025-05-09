@@ -177,14 +177,11 @@ class AuthService:
         await RedisService.delete_otp(user_id)
 
     @staticmethod
-    async def resend_verification_email(user_id: str) -> bool:
+    async def resend_verification_email(user_id: str) -> None:
         """Resend verification email with new OTP.
 
         Args:
             user_id: User ID
-
-        Returns:
-            True if email sent successfully
 
         Raises:
             HTTPException (404): If user not found
@@ -205,4 +202,58 @@ class AuthService:
         otp = generate_otp()
         await RedisService.store_otp(user_id, otp)
 
-        return await EmailService.send_verification_email(user.email, otp)
+        await EmailService.send_verification_email(user.email, otp)
+
+    @staticmethod
+    async def forgot_password(email: EmailStr) -> None:
+        """Send password reset OTP for forgot password.
+
+        Args:
+            email: User's email
+
+        Raises:
+            HTTPException (404): If user with email not found
+        """
+        user = await User.find_one(User.email == email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User with this email not found",
+            )
+
+        otp = generate_otp()
+        await RedisService.store_otp(f"pwd-reset:{user.id}", otp)
+
+        await EmailService.send_password_reset_email(email, otp)
+
+    @staticmethod
+    async def reset_password(email: EmailStr, otp: str, new_password: str) -> None:
+        """Reset password with OTP verification.
+
+        Args:
+            email: User's email
+            otp: One-time password for verification
+            new_password: New password
+
+        Raises:
+            HTTPException (400): If OTP is invalid or expired
+            HTTPException (404): If user with email not found
+        """
+        user = await User.find_one(User.email == email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User with this email not found",
+            )
+
+        stored_otp = await RedisService.get_otp(f"pwd-reset:{user.id}")
+        if not stored_otp or stored_otp != otp:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired verification code",
+            )
+
+        hashed_password = get_password_hash(new_password)
+        await user.update({"$set": {"password_hash": hashed_password}})
+
+        await RedisService.delete_otp(f"pwd-reset:{user.id}")

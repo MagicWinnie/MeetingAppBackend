@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.models.user import User
 
 from .dependencies import get_current_user
-from .schemas import EmailVerification, Token, TokenRefresh, UserCreate
+from .schemas import EmailVerification, ForgotPasswordRequest, ResetPasswordRequest, Token, TokenRefresh, UserCreate
 from .service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -63,3 +63,26 @@ async def resend_verification(current_user: Annotated[User, Depends(get_current_
     Returns status code 404, if user is not found.
     """
     await AuthService.resend_verification_email(user_id=str(current_user.id))
+
+
+@router.post("/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    """Request password reset by sending OTP to email.
+
+    Returns status code 404 if user with email not found.
+    """
+    await AuthService.forgot_password(email=request.email)
+
+
+@router.post("/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    """Reset password using OTP verification.
+
+    Returns status code 400 if OTP is invalid or expired.
+    Returns status code 404 if user with email not found.
+    """
+    await AuthService.reset_password(
+        email=request.email,
+        otp=request.otp,
+        new_password=request.new_password,
+    )
