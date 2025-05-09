@@ -49,3 +49,9 @@ class TokenRefresh(BaseModel):
     """Token refresh schema."""
 
     refresh_token: str
+
+
+class EmailVerification(BaseModel):
+    """Email verification schema."""
+
+    otp: str = Field(..., min_length=6, max_length=6)

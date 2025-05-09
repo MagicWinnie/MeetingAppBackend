@@ -25,6 +25,18 @@ class Settings(BaseSettings):
     AWS_S3_ACCESS_KEY_ID: str
     AWS_S3_SECRET_ACCESS_KEY: str
 
+    # Redis settings
+    REDIS_HOST: str = "redis"
+    REDIS_PORT: int = 6379
+    REDIS_PASSWORD: str
+
+    # Email settings
+    EMAIL_HOST: str
+    EMAIL_PORT: int
+    EMAIL_FROM: str
+    EMAIL_PASSWORD: str
+    EMAIL_TIMEOUT: int = 3
+
     PASSWORD_PATTERN: str = r"^(?=.*[a-zA-Z])(?=.*\d).+$"
 
     @property
