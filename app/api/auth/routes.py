@@ -3,7 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .schemas import Token, TokenRefresh, UserCreate
+from app.core.models.user import User
+
+from .dependencies import get_current_user
+from .schemas import EmailVerification, ForgotPasswordRequest, ResetPasswordRequest, Token, TokenRefresh, UserCreate
 from .service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -26,17 +29,60 @@ async def register(user_data: UserCreate):
 
 @router.post("/login", response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    """Log in and get access token.
+    """Authenticate and get access token.
 
-    Returns status code 401, if username or password is incorrect.
+    Returns status code 401, if authentication fails.
     """
     return await AuthService.login(username=form_data.username, password=form_data.password)
 
 
 @router.post("/refresh", response_model=Token)
-async def refresh_token(body: TokenRefresh):
+async def refresh_token(refresh: TokenRefresh):
     """Refresh access token.
 
     Returns status code 401, if refresh token is invalid.
     """
-    return await AuthService.refresh_token(refresh_token=body.refresh_token)
+    return await AuthService.refresh_token(refresh_token=refresh.refresh_token)
+
+
+@router.post("/verify-email", response_model=None)
+async def verify_email(verification: EmailVerification, current_user: Annotated[User, Depends(get_current_user)]):
+    """Verify user email with OTP.
+
+    Returns status code 400, if OTP is invalid or expired.
+    Returns status code 404, if user is not found.
+    """
+    await AuthService.verify_email(user_id=str(current_user.id), otp=verification.otp)
+
+
+@router.post("/resend-verification", response_model=None)
+async def resend_verification(current_user: Annotated[User, Depends(get_current_user)]):
+    """Resend verification email with new OTP.
+
+    Returns status code 400, if user is already verified.
+    Returns status code 404, if user is not found.
+    """
+    await AuthService.resend_verification_email(user_id=str(current_user.id))
+
+
+@router.post("/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    """Request password reset by sending OTP to email.
+
+    Returns status code 404 if user with email not found.
+    """
+    await AuthService.forgot_password(email=request.email)
+
+
+@router.post("/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    """Reset password using OTP verification.
+
+    Returns status code 400 if OTP is invalid or expired.
+    Returns status code 404 if user with email not found.
+    """
+    await AuthService.reset_password(
+        email=request.email,
+        otp=request.otp,
+        new_password=request.new_password,
+    )

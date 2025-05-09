@@ -4,6 +4,7 @@ networks:
 
 volumes:
   db-data:
+  redis-data:
 
 services:
   db:
@@ -28,6 +29,7 @@ services:
       dockerfile: ./app/Dockerfile
     depends_on:
       - db
+      - redis
     container_name: meetingapp-app
     env_file:
       - .env
@@ -35,6 +37,27 @@ services:
       - "8888:8000"
     networks:
       - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  redis:
+    image: redis:latest
+    container_name: meetingapp-redis
+    command:
+      - /bin/sh
+      - -c
+      # https://stackoverflow.com/a/72593084
+      - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
+    networks:
+      - app-network
+    volumes:
+      - redis-data:/var/lib/redis/data
+      - ./redis_data/redis.conf:/usr/local/etc/redis/redis.conf
+    env_file:
+      - .env
     logging:
       driver: "json-file"
       options:

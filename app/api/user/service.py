@@ -7,7 +7,6 @@ from beanie.operators import GTE, LTE, And, In, Or
 from botocore.config import Config as BotoConfig
 from fastapi import HTTPException, UploadFile, status
 
-from app.api.auth.dependencies import get_password_hash
 from app.config import settings
 from app.core.models.user import User
 from app.core.utils.age import get_age
@@ -67,7 +66,7 @@ class UserService:
             Updated user
 
         Raises:
-            HTTPException (400): If phone number already exists
+            HTTPException (400): If username or email already exists
         """
         update_data = user_update.model_dump(exclude_unset=True)
 
@@ -78,9 +77,6 @@ class UserService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Username or email already exists",
                 )
-        if "password" in update_data:
-            update_data["password_hash"] = get_password_hash(update_data["password"])
-            del update_data["password"]
         if "birth_date" in update_data:
             age = get_age(update_data["birth_date"])
             if age < 18:
